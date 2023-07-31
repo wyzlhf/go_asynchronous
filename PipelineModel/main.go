@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 //func Buy(n int) <-chan string{
 //	out:=make(chan string)
 //	go func() {
@@ -38,3 +40,42 @@ package main
 //		fmt.Println(p)
 //	}
 //}
+
+func Generator(max int) <-chan int {
+	out := make(chan int, 100)
+	go func() {
+		for i := 1; i <= max; i++ {
+			out <- i
+		}
+		close(out)
+	}()
+	return out
+}
+func Square(in <-chan int) <-chan int {
+	out := make(chan int, 100)
+	go func() {
+		for v := range in {
+			out <- v * v
+		}
+		close(out)
+	}()
+	return out
+}
+func Sum(in <-chan int) <-chan int {
+	out := make(chan int, 100)
+	go func() {
+		var Sum int
+		for v := range in {
+			Sum += v
+		}
+		out <- Sum
+		close(out)
+	}()
+	return out
+}
+func main() {
+	arr := Generator(555555555)
+	squ := Square(arr)
+	sum := <-Sum(squ)
+	fmt.Println(sum)
+}
